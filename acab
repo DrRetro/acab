@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+import sys
+import os 
+import optparse
+from itertools import chain
+
+###
+#CONSTANTS AND STRINGS
+###
+CHARS_PER_LINE = os.get_terminal_size()[0]
+#CLEAREDCHARWIDTH = CHARSPERLINE - UNUSABLECHARS
+#COLUMNS = int( CLEAREDCHARWIDTH / 5)
+USAGE = "usage: %prog [options]"
+
+
+###
+# FUNCTIONS
+###
+def eight_colour_test():
+    colourexamples = list()
+    for colour in range(30,38):
+        colourexamples.append(
+            "\u001b"                #Unicode escape character - same as \e or \x1b
+            +"["                    #Control Sequence Introducer 
+            +"1;"                   #Control Sequence for set foreground colour (8 colours)
+            +str(colour)            #Colour ID as number string 
+            +"m"                    #End of control sequence
+            +"\u2588"               #Unicode for "Full Block"
+            #+str(colour).rjust(3, " ") <-- TODO: Ask somebody with OCD which version is better
+            +str(colour)            #Displays the current colour ID with leading zeros
+            +" "                    #Space as a separtor between the columns
+            )                       
+    return 4, colourexamples
+
+
+def sixteen_colour_test():
+    colourexamples = list()
+    for colour in chain(range(30,38),range(90,98)):
+        colourexamples.append(
+            "\u001b"                #Unicode escape character - same as \e or \x1b
+            +"["                    #Control Sequence Introducer 
+            +"2;"                   #Control Sequence for set foreground colour (16 colours)
+            +str(colour)            #Colour ID as number string 
+            +"m"                    #End of control sequence
+            +"\u2588"               #Unicode for "Full Block"
+            #+str(colour).rjust(3, " ") <-- TODO: Ask somebody with OCD which version is better
+            +str(colour)            #Displays the current colour ID with leading zeros
+            +" "                    #Space as a separtor between the columns
+            )
+    return 4, colourexamples
+
+
+
+def eight_bit_test():
+    colourexamples = list()
+    for colour in range(0,255):
+        colourexamples.append(
+            "\u001b"                #Unicode escape character - same as \e or \x1b
+            +"["                    #Control Sequence Introducer 
+            +"38;5;"                #Control Sequence for set foreground colour (8-Bit Colours) 
+            +str(colour)            #Colour ID as number string 
+            +"m"                    #End of control sequence
+            +"\u2588"               #Unicode for "Full Block"
+            #+str(colour).rjust(3, " ") <-- TODO: Ask somebody with OCD which version is better
+            +str(colour).zfill(3)   #Displays the current colour ID with leading zeros
+            +" "                    #Space as a separtor between the columns
+            )                       
+    return 5, colourexamples
+
+
+def twentyfour_bit_test():
+    colourexamples = list()
+    for colour in range(0,255):
+        colourexamples.append(
+            "\u001b"                    #Unicode escape character - same as \e or \x1b
+            +"["                        #Control Sequence Introducer 
+            +"38;2;"                    #Control Sequence for set foreground colour (8-Bit Colours) 
+            +str(colour)                #Red 8 Bit as number string
+            +";"                        #Seperator
+            +str(colour)                #Green 8 Bit as number string
+            +";"                        #Seperator
+            +str(colour)                #Blue 8 Bit as number string
+            +"m"                        #End of control sequence
+            +"\u2588"                   #Unicode for "Full Block"
+            +hex(colour)[2:].upper()    #Displays the current Red 8 Bits as plain hexcode
+            +hex(colour)[2:].upper()    #Displays the current Green 8 Bits as plain hexcode
+            +hex(colour)[2:].upper()    #Displays the current Blue 8 Bits as plain hexcode
+            +" "                        #Space as a separtor between the columns
+            )
+    return 8, colourexamples
+
+
+def show(columns, list_of_examples):
+    for element in range(0, len(list_of_examples), columns):
+        print("".join(list_of_examples[element:element+columns]))
+
+
+def columns_per_line_calc(columnlength):
+    unusablechars_in_line = CHARS_PER_LINE % columnlength
+    cleared_chars_length_per_line = CHARS_PER_LINE - unusablechars_in_line
+    return int(cleared_chars_length_per_line / columnlength)
+
+
+def process():
+    parser = optparse.OptionParser(usage=USAGE)
+    parser.add_option(
+        '-3', 
+        '--8-colours', 
+        '--8-colors',
+        action='store_true', 
+        dest='eight_colours',
+        default=False,
+        help='shows a 8 colour ANSI test with escape sequence ^[1;$COLOUR')
+    parser.add_option(
+        '-4', 
+        '--16-colours', 
+        '--16-colors',
+        action='store_true', 
+        dest='sixteen_colours',
+        default=False,
+        help='shows a 16 colour ANSI test with escape sequence ^[2;$COLOUR')
+    parser.add_option(
+        '-8', 
+        '--8-bit-colours', 
+        '--8-bit-colors',
+        action='store_true', 
+        dest='eight_bit_colours',
+        default=False,
+        help='shows a 8 bit colour ANSI test with escape sequence ^[38;5;$COLOUR')
+    parser.add_option(
+        '-f', 
+        '--24-bit-colours', 
+        '--24-bit-colors',
+        action='store_true', 
+        dest='twentyfour_bit_colours',
+        default=False,
+        help='shows a 24 bit colour ANSI test with escape sequence ^[38;2;$R;$G;$B')
+    (options, args) = parser.parse_args()
+    if options.eight_colours == True:
+        columnlength, examplelist = eight_colour_test()
+        columns_per_line = columns_per_line_calc(columnlength)
+        show(columns_per_line, examplelist)
+    elif options.sixteen_colours == True:
+        columnlength, examplelist = sixteen_colour_test()
+        columns_per_line = columns_per_line_calc(columnlength)
+        show(columns_per_line, examplelist)
+    elif options.eight_bit_colours == True:
+        columnlength, examplelist = eight_bit_test()
+        columns_per_line = columns_per_line_calc(columnlength)
+        show(columns_per_line, examplelist)
+    elif options.twentyfour_bit_colours == True:
+        columnlength, examplelist = twentyfour_bit_test()
+        columns_per_line = columns_per_line_calc(columnlength)
+        show(columns_per_line, examplelist)
+    else:
+        print('Error: at least one option must be given!')
+        parser.print_help()
+        sys.exit(1)
+    sys.exit(0)
+
+
+###
+# ENTRYPOINT
+###
+
+if __name__ == '__main__':
+    process()
