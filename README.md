@@ -1,6 +1,8 @@
 # acab
 acab - all colours are beautiful
 
+![Screenshot of an example output with 256 colours in the shell](./example_output.png)
+
 It really annoyed me that the only way to test ANSI colours in any console was to use an ancient shell script or a few binary files that came with obscene package dependencies.
 So why not implement the whole thing in Python?
 
