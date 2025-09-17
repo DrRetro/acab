@@ -8,10 +8,8 @@ from itertools import chain
 #CONSTANTS AND STRINGS
 ###
 CHARS_PER_LINE = os.get_terminal_size()[0]
-#CLEAREDCHARWIDTH = CHARSPERLINE - UNUSABLECHARS
-#COLUMNS = int( CLEAREDCHARWIDTH / 5)
 USAGE = "usage: %prog [options]"
-
+VERSION = "0.9.0"
 
 ###
 # FUNCTIONS
@@ -102,7 +100,7 @@ def columns_per_line_calc(columnlength):
 
 
 def process():
-    parser = optparse.OptionParser(usage=USAGE)
+    parser = optparse.OptionParser(usage=USAGE, version=VERSION)
     parser.add_option(
         '-3', 
         '--8-colours', 
